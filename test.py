@@ -177,7 +177,7 @@ def detect(screen,cnf=0.20):
     #show_detected_corners(screen)
     print("time to copy",time()-timer)
     timer=time()
-    results = model.predict(source=screen,show=True,hide_labels=True,line_thickness=0,conf=cnf)
+    results = model.predict(source=screen,show=False,hide_labels=True,line_thickness=0,conf=cnf)
     print("time to show",time()-timer)
     timer=time()
     #print(results)
