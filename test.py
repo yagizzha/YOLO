@@ -315,6 +315,12 @@ def transform_image_color(original, bw, threshold=240):
 
     return original
 
+    
+@app.route('/health-check',methods=['GET'])
+def getHealthCheck():
+    response=jsonify({"status":"healthy"})
+    return response
+
 @app.route('/turntopng',methods=['POST'])
 def returnEndProduct():
     nparr = np.frombuffer(request.data, np.uint8)
