@@ -328,26 +328,27 @@ def returnEndProduct():
     return response
 
 if __name__=='__main__':
-    img = cv2.imread("images/Cars265.png")
-    #results = model.predict(source=img,show=True,hide_labels=True,line_thickness=0,conf=0.35)
-    #results = model.predict(source=img,show=True,line_thickness=3,conf=0.1)
-    #print(results)
-    img = cv2.imread(f"images/Cars265.png")
-    #img = cv2.imread(f"images/Cars{str(100+i)}.png")
-    res = detect(img)
-    cv2.imshow("test",res)
-    cv2.waitKey(1)
-    exit()
-    for i in range(1):
-        try:
-            img = cv2.imread(f"images/Cars265.png")
-            #img = cv2.imread(f"images/Cars{str(100+i)}.png")
-            res = detect(img)
-            cv2.imshow("test",res)
-            cv2.waitKey(1)
-        except Exception as e :
-            print("failed",e)
-        sleep(0.5)
-    #app.run(host='0.0.0.0',port=2999)
+    if False:
+        img = cv2.imread("images/Cars265.png")
+        #results = model.predict(source=img,show=True,hide_labels=True,line_thickness=0,conf=0.35)
+        #results = model.predict(source=img,show=True,line_thickness=3,conf=0.1)
+        #print(results)
+        img = cv2.imread(f"images/Cars265.png")
+        #img = cv2.imread(f"images/Cars{str(100+i)}.png")
+        #res = detect(img)
+        #cv2.imshow("test",res)
+        #cv2.waitKey(1)
+        for i in range(4):
+            try:
+                img = cv2.imread(f"gen/{i+1}.png")
+                #img = cv2.imread(f"images/Cars{str(100+i)}.png")
+                res = detect(img)
+                cv2.imwrite(f"gen/{i+1}gen.png",res)
+                cv2.imshow("test",res)
+                cv2.waitKey(1)
+            except Exception as e :
+                print("failed",e)
+            sleep(0.5)
+    app.run(host='0.0.0.0',port=2999)
 
     pass
