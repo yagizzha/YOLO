@@ -2,7 +2,6 @@ from ultralytics import YOLO
 import cv2
 from ultralytics.yolo.v8.detect.predict import DetectionPredictor
 from ultralytics.yolo.engine.results import Results
-import pyautogui
 import math
 import numpy as np
 from flask import Flask,make_response,jsonify
@@ -167,7 +166,7 @@ def show_detected_corners(img, threshold=150, nonmax_suppression=True, type_9_12
     keypoints = fast.detect(gray, None)
     cv2.drawKeypoints(img, keypoints, img, color=(0, 0, 255))
 
-    cv2.imshow('FAST Corners', img)
+    #cv2.imshow('FAST Corners', img)
     cv2.waitKey(0)
 
 
@@ -200,7 +199,7 @@ def detect(screen,cnf=0.20):
             x,y = corner.ravel()
             cv2.circle(screen,(int(x*len(screen)/640), int(y*len(screen)/640)),5,(255, pix, 0),-1)
             pix+=50
-        cv2.imshow("center_marked",screen)
+        #cv2.imshow("center_marked",screen)
 
 
 
@@ -260,7 +259,7 @@ def detect(screen,cnf=0.20):
 
 
 
-        cv2.imshow("postblur",x)
+        #cv2.imshow("postblur",x)
 
         return transform_image_color(screencopy,x)
         contours,_ = cv2.findContours(x, 1, 1)
@@ -344,7 +343,7 @@ if __name__=='__main__':
                 #img = cv2.imread(f"images/Cars{str(100+i)}.png")
                 res = detect(img)
                 cv2.imwrite(f"gen/{i+1}gen.png",res)
-                cv2.imshow("test",res)
+                #cv2.imshow("test",res)
                 cv2.waitKey(1)
             except Exception as e :
                 print("failed",e)
