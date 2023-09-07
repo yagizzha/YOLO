@@ -315,7 +315,7 @@ def transform_image_color(original, bw, threshold=240):
 
     return original
 
-    
+
 @app.route('/health-check',methods=['GET'])
 def getHealthCheck():
     response=jsonify({"status":"healthy"})
@@ -326,7 +326,7 @@ def returnEndProduct():
     nparr = np.frombuffer(request.data, np.uint8)
     img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
     img=detect(img)
-    cv2.imwrite("recieved.png",img)
+    #cv2.imwrite("recieved.png",img)
     retval, buffer = cv2.imencode('.png', img)
     response=make_response(buffer.tobytes())
     #print(response)
