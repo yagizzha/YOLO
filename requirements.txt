@@ -1,4 +1,4 @@
-dnspython==2.4.2
+dnspython
 Flask==2.1.2
 numpy==1.22.4
 PyAutoGUI==0.9.53
