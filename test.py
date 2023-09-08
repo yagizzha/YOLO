@@ -332,6 +332,7 @@ def returnEndProduct():
     #print(response)
     return response
 
+
 @app.route('/test1',methods=['POST'])
 def fillPlates():
     print("test12")
@@ -354,8 +355,8 @@ def fillPlates():
                                 data=image_buffer.tobytes(),
                                 headers={'Content-Type': 'image/png'}
                             )
-        uploadedImageUrls.append(uploadedImageUrl.json()["body"]["uploadedUrl"])
-    return jsonify({"uploadedImageUrls": uploadedImageUrls})
+        uploadedImageUrls.append({"url":uploadedImageUrl.json()["body"]["url"],"key":uploadedImageUrl.json()["body"]["key"]})
+    return jsonify({"uploadedImages": uploadedImageUrls})
 
 
 if __name__=='__main__':
