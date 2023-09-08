@@ -332,28 +332,22 @@ def returnEndProduct():
     #print(response)
     return response
 
+@app.route('/apply-effect/fill',methods=['POST'])
+def fillPlates():
+    imageLinks = request.json['imageLinks']
+    colorCode = request.json['colorCode']
+    uploadedImageUrls = []
+    for imageLink in imageLinks:
+        img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+        img=detect(img)
+        retval, buffer = cv2.imencode('.png', img)
+        with open(buffer, 'rb') as file:
+            image_data = file.read()
+        uploadedImageUrl = requests.post("https://www.liplate.com/api/upload-image-response", data=image_data, headers={'Content-Type': 'image/jpeg'})
+        uploadedImageUrls.append(uploadedImageUrl)
+    return jsonify({"uploadedImageUrls": uploadedImageUrls})
+
 if __name__=='__main__':
-    if False:
-        img = cv2.imread("images/Cars265.png")
-        #results = model.predict(source=img,show=True,hide_labels=True,line_thickness=0,conf=0.35)
-        #results = model.predict(source=img,show=True,line_thickness=3,conf=0.1)
-        #print(results)
-        img = cv2.imread(f"images/Cars265.png")
-        #img = cv2.imread(f"images/Cars{str(100+i)}.png")
-        #res = detect(img)
-        #cv2.imshow("test",res)
-        #cv2.waitKey(1)
-        for i in range(4):
-            try:
-                img = cv2.imread(f"gen/{i+1}.png")
-                #img = cv2.imread(f"images/Cars{str(100+i)}.png")
-                res = detect(img)
-                cv2.imwrite(f"gen/{i+1}gen.png",res)
-                #cv2.imshow("test",res)
-                cv2.waitKey(1)
-            except Exception as e :
-                print("failed",e)
-            sleep(0.5)
     app.run(host='0.0.0.0',port=2999)
 
     pass
