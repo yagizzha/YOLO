@@ -344,18 +344,21 @@ def fillPlates():
     uploadedImageUrls = []
     bgr=hex_to_bgr(colorCode)
     for imageLink in imageLinks:
-        response = requests.get(imageLink)
-        print(imageLink)
-        image_np_array = np.frombuffer(response.content, np.uint8)
-        image = cv2.imdecode(image_np_array, cv2.IMREAD_COLOR)
-        img=detect(image,bgr)
-        is_success, image_buffer = cv2.imencode(".png", img)
-        uploadedImageUrl = requests.post(
-                                "https://www.liplate.app/api/upload-image-response",
-                                data=image_buffer.tobytes(),
-                                headers={'Content-Type': 'image/png'}
-                            )
-        uploadedImageUrls.append({"url":uploadedImageUrl.json()["body"]["url"],"key":uploadedImageUrl.json()["body"]["key"]})
+        try:
+            response = requests.get(imageLink)
+            print(imageLink)
+            image_np_array = np.frombuffer(response.content, np.uint8)
+            image = cv2.imdecode(image_np_array, cv2.IMREAD_COLOR)
+            img=detect(image,bgr)
+            is_success, image_buffer = cv2.imencode(".png", img)
+            uploadedImageUrl = requests.post(
+                                    "https://www.liplate.app/api/upload-image-response",
+                                    data=image_buffer.tobytes(),
+                                    headers={'Content-Type': 'image/png'}
+                                )
+            uploadedImageUrls.append({"url":uploadedImageUrl.json()["body"]["url"],"key":uploadedImageUrl.json()["body"]["key"]})
+        except Exception as e:
+            print(e)
     return jsonify({"uploadedImages": uploadedImageUrls})
 
 
