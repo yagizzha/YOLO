@@ -11,6 +11,7 @@ import dns.resolver
 from time import time
 import torch
 from time import sleep
+import requests
 
 
 dns.resolver.default_resolver=dns.resolver.Resolver(configure=False)
@@ -170,7 +171,7 @@ def show_detected_corners(img, threshold=150, nonmax_suppression=True, type_9_12
     cv2.waitKey(0)
 
 
-def detect(screen,cnf=0.20):
+def detect(screen,bgr,cnf=0.20):
     timer=time()
     screencopy=screen.copy()
     screen=resize_with_whitespace(screen)
@@ -261,7 +262,7 @@ def detect(screen,cnf=0.20):
 
         #cv2.imshow("postblur",x)
 
-        return transform_image_color(screencopy,x)
+        return transform_image_color(screencopy,x,bgr)
         contours,_ = cv2.findContours(x, 1, 1)
         #print("len",len(contours),contours)
         screen=cv2.drawContours(screen,[contours[0]],-1,(0,255,0),2)
@@ -291,29 +292,28 @@ def detect(screen,cnf=0.20):
 def average_array(arr):
     return sum(arr) / len(arr)
 
-def transform_image_color(original, bw, threshold=240):
-
-    colors_b=[]
-    colors_g=[]
-    colors_r=[]
-    locs=[]
-
+def transform_image_color(original, bw, bgr, threshold=240):
+    (b,g,r)=bgr
     for i in range(len(original)):
         for j in range(len(original[i])):
-            if bw[i][j]>250:
-                locs.append([i,j])
-                colors_b.append(original[i][j][0])
-                colors_g.append(original[i][j][1])
-                colors_r.append(original[i][j][2])
-
-    b,g,r=average_array(colors_b),average_array(colors_g),average_array(colors_r)
-    for location in locs:
-        original[location[0]][location[1]][0]=b
-        original[location[0]][location[1]][1]=g
-        original[location[0]][location[1]][2]=r
-
+            if bw[i][j]>threshold:
+                original[i][j][0]=b
+                original[i][j][1]=g
+                original[i][j][2]=r
 
     return original
+
+def hex_to_bgr(hex_color: str):
+    # Remove '#' prefix if it exists
+    hex_color = hex_color.lstrip('#')
+    
+    # Convert HEX to RGB
+    r = int(hex_color[0:2], 16)
+    g = int(hex_color[2:4], 16)
+    b = int(hex_color[4:6], 16)
+    
+    # Return as BGR
+    return (b, g, r)
 
 
 @app.route('/health-check',methods=['GET'])
@@ -332,22 +332,36 @@ def returnEndProduct():
     #print(response)
     return response
 
-@app.route('/apply-effect/fill',methods=['POST'])
+@app.route('/test1',methods=['POST'])
 def fillPlates():
-    imageLinks = request.json['imageLinks']
+    print("test12")
+    jsonfile = request.json
+    print(jsonfile,type(jsonfile))
+    imageLinks = jsonfile["imageLinks"]
+    print(imageLinks)
     colorCode = request.json['colorCode']
     uploadedImageUrls = []
+    bgr=hex_to_bgr(colorCode)
     for imageLink in imageLinks:
-        img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-        img=detect(img)
-        retval, buffer = cv2.imencode('.png', img)
-        with open(buffer, 'rb') as file:
-            image_data = file.read()
-        uploadedImageUrl = requests.post("https://www.liplate.com/api/upload-image-response", data=image_data, headers={'Content-Type': 'image/jpeg'})
-        uploadedImageUrls.append(uploadedImageUrl)
+        response = requests.get(imageLink)
+        print(imageLink)
+        image_np_array = np.frombuffer(response.content, np.uint8)
+        image = cv2.imdecode(image_np_array, cv2.IMREAD_COLOR)
+        img=detect(image,bgr)
+        is_success, image_buffer = cv2.imencode(".png", img)
+        uploadedImageUrl = requests.post(
+                                "https://www.liplate.app/api/upload-image-response",
+                                data=image_buffer.tobytes(),
+                                headers={'Content-Type': 'image/png'}
+                            )
+        uploadedImageUrls.append(uploadedImageUrl.json()["body"]["uploadedUrl"])
     return jsonify({"uploadedImageUrls": uploadedImageUrls})
 
+
 if __name__=='__main__':
+    print("printing,2")
+    for rule in app.url_map.iter_rules():
+        print(f"Endpoint: {rule.endpoint} - Route: {rule.rule} - Methods: {' | '.join(rule.methods)}")
     app.run(host='0.0.0.0',port=2999)
 
     pass
