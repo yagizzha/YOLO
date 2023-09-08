@@ -333,7 +333,7 @@ def returnEndProduct():
     return response
 
 
-@app.route('/test1',methods=['POST'])
+@app.route('/fill',methods=['POST'])
 def fillPlates():
     print("test12")
     jsonfile = request.json
