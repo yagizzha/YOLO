@@ -349,6 +349,7 @@ def fillPlates():
             image = cv2.imdecode(image_np_array, cv2.IMREAD_COLOR)
             img=detect(image,bgr)
             is_success, image_buffer = cv2.imencode(".png", img)
+            print("is-suc:", is_success, "try on url:", ("http://www.liplate.app/api/upload-image-response/" + albumId))
             if is_success:
                 requests.post(
                     "http://www.liplate.app/api/upload-image-response/" + albumId,
