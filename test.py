@@ -350,7 +350,7 @@ def fillPlates():
             img=detect(image,bgr)
             is_success, image_buffer = cv2.imencode(".png", img)
             uploadedImageUrl = requests.post(
-                                    "https://www.liplate.app/api/upload-image-response/" + albumId,
+                                    "http://localhost:3000/api/upload-image-response/" + albumId,
                                     data=image_buffer.tobytes(),
                                     headers={'Content-Type': 'image/png'}
                                 )
@@ -358,8 +358,8 @@ def fillPlates():
         except Exception as e:
             print(e)
     finalizedAlbum = requests.post(
-                        "https://www.liplate.app/api/finalize-album-creation",
-                        data={"albumId" : albumId},
+                        "http://localhost:3000/api/finalize-album-creation",
+                        data=jsonify({"albumId" : albumId}),
                         headers={'Content-Type': 'application/json'})
 
     return jsonify({"finalizedAlbum": finalizedAlbum})
