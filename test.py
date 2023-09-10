@@ -335,12 +335,10 @@ def returnEndProduct():
 
 @app.route('/fill',methods=['POST'])
 def fillPlates():
-    print("test12")
     jsonfile = request.json
-    print(jsonfile,type(jsonfile))
     imageLinks = jsonfile["imageLinks"]
-    print(imageLinks)
     colorCode = request.json['colorCode']
+    albumId = request.json['albumId']
     uploadedImageUrls = []
     bgr=hex_to_bgr(colorCode)
     for imageLink in imageLinks:
@@ -352,14 +350,19 @@ def fillPlates():
             img=detect(image,bgr)
             is_success, image_buffer = cv2.imencode(".png", img)
             uploadedImageUrl = requests.post(
-                                    "https://www.liplate.app/api/upload-image-response",
+                                    "https://www.liplate.app/api/upload-image-response/" + albumId,
                                     data=image_buffer.tobytes(),
                                     headers={'Content-Type': 'image/png'}
                                 )
             uploadedImageUrls.append({"url":uploadedImageUrl.json()["body"]["url"],"key":uploadedImageUrl.json()["body"]["key"]})
         except Exception as e:
             print(e)
-    return jsonify({"uploadedImages": uploadedImageUrls})
+    finalizedAlbum = requests.post(
+                        "https://www.liplate.app/api/finalize-album-creation",
+                        data={"albumId" : albumId},
+                        headers={'Content-Type': 'application/json'})
+
+    return jsonify({"finalizedAlbum": finalizedAlbum})
 
 
 if __name__=='__main__':
