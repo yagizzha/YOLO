@@ -349,24 +349,22 @@ def fillPlates():
             image = cv2.imdecode(image_np_array, cv2.IMREAD_COLOR)
             img=detect(image,bgr)
             is_success, image_buffer = cv2.imencode(".png", img)
-            uploadedImageUrl = requests.post(
-                                    "http://www.liplate.app/api/upload-image-response/" + albumId,
-                                    data=image_buffer.tobytes(),
-                                    headers={'Content-Type': 'image/png'}
-                                )
-            uploadedImageUrls.append({"url":uploadedImageUrl.json()["body"]["url"],"key":uploadedImageUrl.json()["body"]["key"]})
+            if is_success:
+                requests.post(
+                    "http://www.liplate.app/api/upload-image-response/" + albumId,
+                    data=image_buffer.tobytes(),
+                    headers={'Content-Type': 'image/png'}
+                )
         except Exception as e:
             print(e)
-    finalizedAlbum = requests.post(
-                        "https://www.liplate.app/api/finalize-album-creation",
-                        data=jsonify({"albumId" : albumId}),
-                        headers={'Content-Type': 'application/json'})
-
-    return jsonify({"finalizedAlbum": finalizedAlbum})
+    requests.get(
+        "https://www.liplate.app/api/finalize-album-creation/" + albumId,
+        headers={'Content-Type': 'application/json'}
+    )
+    return jsonify({"message": "Finished the job for the album with the id:" + albumId})
 
 
 if __name__=='__main__':
-    print("printing,2")
     for rule in app.url_map.iter_rules():
         print(f"Endpoint: {rule.endpoint} - Route: {rule.rule} - Methods: {' | '.join(rule.methods)}")
     app.run(host='0.0.0.0',port=2999)
