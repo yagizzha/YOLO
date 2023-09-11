@@ -350,7 +350,7 @@ def fillPlates():
     conversionStatus = convertedImageCount == 0 if "FAILED" else "CONVERTED"
     requests.post(
         "https://www.liplate.app/api/update-album-status/" + albumId,
-        body={ "conversionStatus" : conversionStatus },
+        data={ "conversionStatus" : conversionStatus },
         headers={'Content-Type': 'application/json'}
     )
     return jsonify({"message": "Finished the job for the album with the id:" + albumId})
