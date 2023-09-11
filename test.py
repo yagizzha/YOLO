@@ -315,23 +315,10 @@ def hex_to_bgr(hex_color: str):
     # Return as BGR
     return (b, g, r)
 
-
 @app.route('/health-check',methods=['GET'])
 def getHealthCheck():
     response=jsonify({"status":"healthy"})
     return response
-
-@app.route('/turntopng',methods=['POST'])
-def returnEndProduct():
-    nparr = np.frombuffer(request.data, np.uint8)
-    img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-    img=detect(img)
-    #cv2.imwrite("recieved.png",img)
-    retval, buffer = cv2.imencode('.png', img)
-    response=make_response(buffer.tobytes())
-    #print(response)
-    return response
-
 
 @app.route('/fill',methods=['POST'])
 def fillPlates():
@@ -339,7 +326,7 @@ def fillPlates():
     imageLinks = jsonfile["imageLinks"]
     colorCode = request.json['colorCode']
     albumId = request.json['albumId']
-    uploadedImageUrls = []
+    convertedImageCount = 0
     bgr=hex_to_bgr(colorCode)
     for imageLink in imageLinks:
         try:
@@ -349,17 +336,21 @@ def fillPlates():
             image = cv2.imdecode(image_np_array, cv2.IMREAD_COLOR)
             img=detect(image,bgr)
             is_success, image_buffer = cv2.imencode(".png", img)
-            print("is-suc:", is_success, "try on url:", ("http://www.liplate.app/api/upload-image-response/" + albumId))
             if is_success:
                 requests.post(
                     "http://www.liplate.app/api/upload-image-response/" + albumId,
                     data=image_buffer.tobytes(),
                     headers={'Content-Type': 'image/png'}
                 )
+                convertedImageCount += 1
         except Exception as e:
             print(e)
-    requests.get(
-        "https://www.liplate.app/api/finalize-album-creation/" + albumId,
+    #If there are no images converted conversion is considered failed,
+    #TODO: Set meaningful error codes for failed conversions.
+    conversionStatus = convertedImageCount == 0 if "FAILED" else "CONVERTED"
+    requests.post(
+        "https://www.liplate.app/api/update-album-status/" + albumId,
+        body={ "conversionStatus" : conversionStatus },
         headers={'Content-Type': 'application/json'}
     )
     return jsonify({"message": "Finished the job for the album with the id:" + albumId})
